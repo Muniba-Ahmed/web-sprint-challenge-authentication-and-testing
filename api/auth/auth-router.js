@@ -9,8 +9,17 @@ const {
   checkUserBody,
 } = require("../middleware/authMiddleware");
 
-router.post("/register", (req, res) => {
-  res.end("implement register, please!");
+router.post('/register', checkUserBody, checkUserNameUnique, async (req, res, next) => {
+  const { username, password } = req.body
+  const hash = bcrypt.hashSync(password, 8) //DO NOT EXCEED 2^8 ROUNDS OF HASHING!
+  const user = { username, password: hash }
+  try {
+    const newUserRec = await Users.add(user)
+    res.status(201).json(newUserRec)
+  } catch (error) {
+    next(error)
+  }
+});
   /*
     IMPLEMENT
     You are welcome to build additional middlewares to help with the endpoint's functionality.
