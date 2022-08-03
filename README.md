@@ -53,7 +53,16 @@ Your finished project must include all of the following requirements (further in
 
 Be prepared to demonstrate your understanding of this week's concepts by answering questions on the following topics.
 
-1. Differences between using _sessions_ or _JSON Web Tokens_ for authentication.
-2. What does `bcryptjs` do to help us store passwords in a secure manner?
-3. How are unit tests different from integration and end-to-end testing?
-4. How does _Test Driven Development_ change the way we write applications and tests?
+1.  Differences between using _sessions_ or _JSON Web Tokens_ for authentication.
+    JWTs are widely used as it scales better than that of a session-cookie based because tokens are stored on the client-side while the session uses the server memory to store user data. If we only want to send a client authentication to specific data and not all data we can use JWTs because they make a request to the server and only comeback with authorized data.
+
+        JWT's are stateless, meaning they are never saved to the database. Instead, they are encrypted tokens that are signed (to ensure they do are not altered and are authentic) and include the user_id right inside the token- thus no database lookup is required to identify the user. API calls that require authentication must include an Authorization token in the header to go through.
+
+        With sessions, after a user successfully logs in, the server will generate a sessionId, signed with a secret key, and save that into the database. On the client side, it will send a cookie with that sessionId to the browser and the browser will save that cookie to local storage and include the cookie on every request.
+
+2.  What does `bcryptjs` do to help us store passwords in a secure manner?
+    bycrypt allows use to hash a password so that the password does not show up in the data object as the real password. Bcryptjs also adds a random "salt" to the password the user enters and allows you to hash the password as many times as 2^8 etc etc, making it even harder to reverse engineer for hackers.
+3.  How are unit tests different from integration and end-to-end testing?
+    Unit testing is different from end to end testing because unit tests only tests specific functions as opposed to e2e testing where we are passing in fake data to fill in as if a client was using our website. End to end testing allows us to see where our code might be failing once it is in the hands of a client interaction.
+4.  How does _Test Driven Development_ change the way we write applications and tests?
+    Test driven development works backwords. As opposed to writing our code first and ensuring that our code is working, we use tests to develop. We create a test for the functionality that we want in our code and then we program so that our tests pass. A downside to this is that we sometimes can get passing tests without our code doing what it wants to do.
