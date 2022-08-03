@@ -9,18 +9,23 @@ const {
   checkUserBody,
 } = require("../middleware/authMiddleware");
 
-router.post('/register', checkUserBody, checkUserNameUnique, async (req, res, next) => {
-  const { username, password } = req.body
-  const hash = bcrypt.hashSync(password, 8) //DO NOT EXCEED 2^8 ROUNDS OF HASHING!
-  const user = { username, password: hash }
-  try {
-    const newUserRec = await Users.add(user)
-    res.status(201).json(newUserRec)
-  } catch (error) {
-    next(error)
+router.post(
+  "/register",
+  checkUserBody,
+  checkUserNameUnique,
+  async (req, res, next) => {
+    const { username, password } = req.body;
+    const hash = bcrypt.hashSync(password, 8); //DO NOT EXCEED 2^8 ROUNDS OF HASHING!
+    const user = { username, password: hash };
+    try {
+      const newUserRec = await Users.add(user);
+      res.status(201).json(newUserRec);
+    } catch (error) {
+      next(error);
+    }
   }
-});
-  /*
+);
+/*
     IMPLEMENT
     You are welcome to build additional middlewares to help with the endpoint's functionality.
     DO NOT EXCEED 2^8 ROUNDS OF HASHING!
@@ -45,11 +50,34 @@ router.post('/register', checkUserBody, checkUserNameUnique, async (req, res, ne
     4- On FAILED registration due to the `username` being taken,
       the response body should include a string exactly as follows: "username taken".
   */
+
+router.post("/login", checkUserBody, checkUserNameExists, (req, res, next) => {
+  const user = req.user;
+  const { password } = req.body;
+  const validCredentials = bcrypt.compareSync(password, user.password);
+
+  const generateToken = (user) => {
+    const payload = {
+      subject: user.id,
+      username: user.username,
+    };
+    const options = {
+      expiresIn: "1d",
+    };
+    return jwt.sign(payload, JWT_SECRET, options);
+  };
+
+  if (validCredentials) {
+    res.status(200).json({
+      message: `welcome, ${user.username}`,
+      token: generateToken(user),
+    });
+  } else {
+    next({ status: 401, message: "invalid credentials" });
+  }
 });
 
-router.post("/login", (req, res) => {
-  res.end("implement login, please!");
-  /*
+/*
     IMPLEMENT
     You are welcome to build additional middlewares to help with the endpoint's functionality.
 
@@ -72,6 +100,5 @@ router.post("/login", (req, res) => {
     4- On FAILED login due to `username` not existing in the db, or `password` being incorrect,
       the response body should include a string exactly as follows: "invalid credentials".
   */
-});
 
 module.exports = router;
